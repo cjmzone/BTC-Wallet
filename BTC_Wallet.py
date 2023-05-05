@@ -39,29 +39,28 @@ class GetLive:
 
 class Wallet:
     def __init__ (self):
-        self.shares = 0
-        self.btc = GetLive()
         self.capital = 75000
+        self.shares = 0
         self.btcValue = 0
+        self.btc = GetLive()
         
-    def purchasedBTC(self, capital, shares):
-        #float("{:.2f}".format(capital))
-        self.capital = float("{:.2f}".format(capital))
-        #self.shares = float("{:.2f}".format(self.shares + shares))
+    def purchasedBTC(self, shares, btcValue):
+        self.capital = self.capital - btcValue
         self.shares = self.shares + shares
+        self.btcValue = self.btcValue + btcValue
         return self.capital, self.shares
     
-    def soldBTC(self, capital, shares):
-        #float("{:.2f}".format(capital))
-        self.capital = float("{:.2f}".format(capital))
-        self.shares = float("{:.2f}".format(self.shares - shares))
+    def soldBTC(self, capital, shares, btcValue):
+        self.capital = self.capital + btcValue
+        self.shares = self.shares - shares
+        self.btcValue = self.btcValue - btcValue
         return self.capital, self.shares
         
-    def seeBalance(self,capital,shares):
-        print("Current USD amount:", self.capital)
-        print("Tokens in wallet:  ", self.shares)
-        print("Current BTC price: ", self.btc.getPrice())
-        
+    def seeBalance(self):
+        print(f"Your total USD:                   ${self.capital:.2f}")
+        print(f"Your total amount of BTC tokens:   {self.shares}")
+        print(f"Your BTC total value:             ${self.btcValue:.2f}")
+
 class Ledger:
     def __init__(self):
         self.transaction = []
@@ -74,51 +73,50 @@ class Ledger:
         print("\nTransaction History:")
         for eachItem in self.transaction:
             print(eachItem)
-#main 
+
+# main 
 def main():
-    # Global Variables
+    
+    # Global instances
     m_wallet = Wallet()
     m_ledger = Ledger()
-    date = Date()
-    
-    def buyBTC(capital, shares):
-        
+    m_date = Date()
+
+    def buyBTC():
         if(m_wallet.capital <= 0):
             print("Sorry, you're out of money!")
         else:
-            print(f"\nYour total USD:                     ${m_wallet.capital}")
-            print(f"Your total dollar amount in BTC:    ${m_wallet.btcValue}")
-            print(f"Your total amount of BTC tokens:     {m_wallet.shares}")
+            print()
+            m_wallet.seeBalance()
             print(f"\nCurrent price of 1 BTC token:       ${m_wallet.btc.getPrice()}")
-            
             
             while True:
                 try:
-                    shares = float(input("How many BTC tokens would you like to purchase? "))
+                    shares = float(input("\nHow many BTC tokens would you like to purchase? "))
+                    btc_value_at_time_of_Purchase = m_wallet.btc.getPrice()
                     if (isinstance(shares,str) == True):
                         raise ValueError
                     
-                    # update investment and capital
-                    btcValue = shares * m_wallet.btc.getPrice()
-                    print(f"Purchasing ${btcValue:.2f} in BTC ...")
+                    # update btcValue relative to scope
+                    btcValue = shares * btc_value_at_time_of_Purchase
                     
                     if(btcValue > m_wallet.capital):
                         print("Your purchase amount is greater than your capital. \nPlease try again.")
                     else:
-                        m_wallet.btcValue += float("{:.2f}".format(shares * m_wallet.btc.getPrice()))
-                        capital = float("{:.2f}".format(capital)) - m_wallet.btcValue
+                        print(f"Purchasing ${btcValue:.2f} in BTC ...")
+    
                         # create transaction String
-                        transaction = "Purchased " + str(shares) + " shares worth of BTC on " + str(date.getDate()) + " at " + str(date.getTime()) + " valued at " + str(m_wallet.btc.getPrice()) + "."
+                        transaction = "Purchased " + str(shares) + " shares worth of BTC on " + str(m_date.getDate()) + " at " + str(m_date.getTime()) + " valued at " + str(btc_value_at_time_of_Purchase) + "."
                         
                         # Update Wallet and Ledger
-                        m_wallet.purchasedBTC(capital, shares)
+                        m_wallet.purchasedBTC(shares, btcValue)
                         m_ledger.addTransaction(transaction)
-                        
-                        return capital, shares
+                    
+                        return m_wallet.capital, m_wallet.shares
+
                 except ValueError:
                     print("Your entry must be numerical. Try again...")
-                        
-            
+
     def sellBTC(capital, shares):
         print("Current pirce of 1 BTC token:",m_wallet.btc.getPrice())
         shares = float(input("How many BTC tokens would you like to sell? "))
@@ -162,7 +160,7 @@ def main():
                 match choice:
                     case 1:
                         # Buy BTC
-                        buyBTC(m_wallet.capital, m_wallet.shares)
+                        buyBTC()
                         tradeAgain()
                         
                     case 2:
@@ -191,11 +189,11 @@ def main():
                 break
             except ValueError: 
                 print("Ivalid input! Try again...")
-        
+
     def exit(self):
         print()
         print("SUMMARY")
-        
+
     menu()
 
 if __name__ == "__main__":
