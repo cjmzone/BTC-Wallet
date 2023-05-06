@@ -3,6 +3,7 @@ import requests
 from bs4 import BeautifulSoup as bs
 
 class Date:
+    
     def __init__(self): 
         self.todays_date = ""
         self.format_date = ""
@@ -20,6 +21,7 @@ class Date:
         return self.format_time
 
 class GetLive:
+    
     def __init__(self):
         self.headers = ""
         self.BTC_URL = ""
@@ -38,6 +40,7 @@ class GetLive:
         return float(self.price.text.replace("$","").replace(",",""))
 
 class Wallet:
+    
     def __init__ (self):
         self.capital = 75000
         self.shares = 0
@@ -62,6 +65,7 @@ class Wallet:
         print(f"Your BTC total value:             ${self.btcValue:.2f}")
 
 class Ledger:
+    
     def __init__(self):
         self.transaction = []
         self.wallet = Wallet()
@@ -83,8 +87,10 @@ def main():
     m_date = Date()
 
     def buyBTC():
+        
         if(m_wallet.capital <= 0):
             print("Sorry, you're out of money!")
+            
         else:
             print()
             m_wallet.seeBalance()
@@ -102,11 +108,11 @@ def main():
                     
                     if(btcValue > m_wallet.capital):
                         print("Your purchase amount is greater than your capital. \nPlease try again.")
+
                     else:
                         print(f"Purchasing ${btcValue:.2f} in BTC ...")
-    
                         # create transaction String
-                        transaction = "Purchased " + str(shares) + " shares worth of BTC on " + str(m_date.getDate()) + " at " + str(m_date.getTime()) + " valued at " + str(btc_value_at_time_of_Purchase) + "."
+                        transaction = f"Purchased {str(shares)} shares worth of BTC on {str(m_date.getDate())} at {str(m_date.getTime())} valued at ${str(btcValue)}."
                         
                         # Update Wallet and Ledger
                         m_wallet.purchasedBTC(shares, btcValue)
