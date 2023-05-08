@@ -27,9 +27,8 @@ class GetLive:
         self.BTC_URL = ""
         self.request = ""
         self.soup = ""
-        self.price = ""
-        self.update_price = ""
-        self.float_price = 0.0
+        self.price = 0
+
 
     def getPrice(self):
         self.headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:103.0) Gecko/20100101 Firefox/103.0'}
@@ -53,7 +52,7 @@ class Wallet:
         self.btcValue = self.btcValue + btcValue
         return self.capital, self.shares
     
-    def soldBTC(self, capital, shares, btcValue):
+    def soldBTC(self, shares, btcValue):
         self.capital = self.capital + btcValue
         self.shares = self.shares - shares
         self.btcValue = self.btcValue - btcValue
@@ -78,7 +77,6 @@ class Ledger:
         for eachItem in self.transaction:
             print(eachItem)
 
-# main 
 def main():
     
     # Global instances
@@ -123,23 +121,43 @@ def main():
                 except ValueError:
                     print("Your entry must be numerical. Try again...")
 
-    def sellBTC(capital, shares):
-        print("Current pirce of 1 BTC token:",m_wallet.btc.getPrice())
-        shares = float(input("How many BTC tokens would you like to sell? "))
+    def sellBTC():
         
-        # update investment and capital
-        investment = shares * m_wallet.btc.getPrice()
-        capital = float("{:.2f}".format(capital)) + investment
-        
-        # create transaction String
-        transaction = "Sold " + str(shares) + " shares worth of BTC on " + str(date.getDate()) + " at " + str(date.getTime()) + " valued at " + str(m_wallet.btc.getPrice()) + "."
-        
-        # Update Wallet and Ledger
-        m_wallet.soldBTC(capital, shares)
-        m_ledger.addTransaction(transaction)
-        
-        return capital, shares
-    
+        if(m_wallet.shares <= 0):
+            print("Sorry, you have no more BTC to sell! ")
+            
+        else:
+            print()
+            m_wallet.seeBalance()
+            print(f"\nCurrent price of 1 BTC token:       ${m_wallet.btc.getPrice()}")
+            
+            while True:
+                try:
+                    shares = float(input("\nHow many BTC tokens would you like to sell? "))
+                    btc_value_at_time_of_Purchase = m_wallet.btc.getPrice()
+                    if (isinstance(shares,str) == True):
+                        raise ValueError
+                    
+                    # update btcValue relative to scope
+                    btcValue = shares * btc_value_at_time_of_Purchase
+                    
+                    if(shares > m_wallet.shares):
+                        print(f"You do not have {shares} to sell!\nPlease try again.")
+
+                    else:
+                        print(f"Selling ${btcValue:.2f} in BTC ...")
+                        # create transaction String
+                        transaction = f"Sold {str(shares)} shares worth of BTC on {str(m_date.getDate())} at {str(m_date.getTime())} valued at ${str(btcValue)}."
+                        
+                        # Update Wallet and Ledger
+                        m_wallet.soldBTC(shares, btcValue)
+                        m_ledger.addTransaction(transaction)
+                    
+                        return m_wallet.capital, m_wallet.shares
+
+                except ValueError:
+                    print("Your entry must be numerical. Try again...")
+
     def tradeAgain():
         print()
         while True:
@@ -151,7 +169,7 @@ def main():
                     print()
                     menu()
                 elif(play == "n"):
-                    exit()
+                    print("Exiting...")
                 return
             except ValueError:
                 print("Invalid input! Try again...")
@@ -171,12 +189,12 @@ def main():
                         
                     case 2:
                         # Sell BTC
-                        sellBTC(m_wallet.capital, m_wallet.shares)
+                        sellBTC()
                         tradeAgain()
                         
                     case 3:
                         # See Balance
-                        m_wallet.seeBalance(m_wallet.capital, m_wallet.shares)
+                        m_wallet.seeBalance()
                         tradeAgain()
                         
                     case 4:
@@ -200,13 +218,8 @@ def main():
         print()
         print("SUMMARY")
 
+
     menu()
 
 if __name__ == "__main__":
     main()
-
-# NOTES! 
-#  Guards to add! 
-#     - edge case to catch negative funds
-#     - invalid input on bitcoin amount 
-
